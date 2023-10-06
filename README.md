@@ -9,6 +9,8 @@ This Bash script helps you quickly identify which Docker container ports are exp
 1. Download the script.
 2. Run the script: `./docker_ports.sh`.
 
+**Note:** My best friend is a colorblind person, so I want software developers to be aware when designing their applications, therefore this script could be run as `./docker_ports.sh --i-am-colorblind` to output everything in the color friendly mode.
+
 
 ## Output 📊
 

@@ -9,6 +9,12 @@ NC='\033[0m' # No Color
 exposed_output=""
 not_exposed_output=""
 max_length=0
+color_blind_mode=0
+
+# Check for color-blind mode flag
+if [[ "$1" == "--i-am-colorblind" ]]; then
+  color_blind_mode=1
+fi
 
 # Get Docker container info
 docker_output=$(docker ps --format '{{.Names}}\t{{.Ports}}')
@@ -33,18 +39,24 @@ while read -r line; do
   fi
 
   # Remove IP prefixes and trailing comma
-  ports=$(echo "$ports" | sed 's/0.0.0.0://g' | sed 's/127.0.0.1://g')
-
-  ports=$(echo "$ports" | sed 's/,$//')
+  ports=$(echo "$ports" | sed 's/0.0.0.0://g' | sed 's/127.0.0.1://g' | sed 's/,$//')
 
   # Align output
   padding=$(printf "%*s" $((max_length - ${#container})) "")
 
   # Check if ports are exposed
   if [[ "$line" == *"0.0.0.0:"* ]] || [[ "$line" == *":::"* ]]; then
-    exposed_output+="${RED}${container}${padding}   ${ports}${NC}\n"
+    if (( color_blind_mode )); then
+      exposed_output+="Exposed: ${container}${padding} : ${ports}\n"
+    else
+      exposed_output+="${RED}${container}${padding} : ${ports}${NC}\n"
+    fi
   else
-    not_exposed_output+="${GREEN}${container}${padding}   ${ports}${NC}\n"
+    if (( color_blind_mode )); then
+      not_exposed_output+="Not Exposed: ${container}${padding} : ${ports}\n"
+    else
+      not_exposed_output+="${GREEN}${container}${padding} : ${ports}${NC}\n"
+    fi
   fi
 done <<< "$docker_output"
 
