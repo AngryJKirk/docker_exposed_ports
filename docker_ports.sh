@@ -10,10 +10,14 @@ exposed_output=""
 not_exposed_output=""
 max_length=0
 color_blind_mode=0
+sort_field_exposed=3
+sort_field_not_exposed=3
 
 # Check for color-blind mode flag
 if [[ "$1" == "--i-am-colorblind" ]]; then
   color_blind_mode=1
+  sort_field_exposed=4
+  sort_field_not_exposed=5
 fi
 
 # Get Docker container info
@@ -39,7 +43,7 @@ while read -r line; do
   fi
 
   # Remove IP prefixes and trailing comma
-  ports=$(echo "$ports" | sed 's/0.0.0.0://g' | sed 's/127.0.0.1://g' | sed 's/,$//')
+  ports=$(echo "$ports" | sed -E 's/([0-9]{1,3}\.){3}[0-9]{1,3}://g' | sed 's/,$//')
 
   # Align output
   padding=$(printf "%*s" $((max_length - ${#container})) "")
@@ -61,5 +65,5 @@ while read -r line; do
 done <<< "$docker_output"
 
 # Sort and print output
-echo -e "$exposed_output"
-echo -e "$not_exposed_output"
+echo -e "$exposed_output" | sort -n -k $sort_field_exposed
+echo -e "$not_exposed_output" | sort -n -k $sort_field_not_exposed
